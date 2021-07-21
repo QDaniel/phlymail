@@ -39,7 +39,7 @@
  */
 function extauth($user, $pass, &$_PM_)
 {
-    if (!isset($_PM_['extauth']['ldap_server']) || !isset($_PM_['extauth']['ldap_port'])){
+    if (!isset($_PM_['extauth']['ldap_server'])){
         return array(-2, 'Check your setup');
     }
     $localpart = $realm = '';
@@ -53,7 +53,7 @@ function extauth($user, $pass, &$_PM_)
         $_PM_['extauth']['ldap_server'] = str_replace('{domain}', $realm, $_PM_['extauth']['ldap_server']);
     }
 
-    if (!$ldap=@ldap_connect($_PM_['extauth']['ldap_server'], $_PM_['extauth']['ldap_port'])) {
+    if (!$ldap=@ldap_connect($_PM_['extauth']['ldap_server'])) {
         return array(-2, 'Can not connect to LDAP Server!');
     } else {
         if (isset($_PM_['extauth']['iswin2k3'])) {
