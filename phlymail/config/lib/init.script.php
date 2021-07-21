@@ -53,14 +53,14 @@ $WP_conf = (file_exists($_PM_['path']['conf'].'/config.choices.ini.php'))
         : array('scheme' => 'default', 'language' => 'de', 'allow_ip' => 0)
         ;
 // Handling special proxy calls here. Very often used for SSL calls thorugh an SSL proxy used for all instances of a hoster
+if (!empty($_PM_['proxy']['proxy_hostname'])) {
+    define('PHM_SERVERNAME', $_PM_['proxy']['proxy_hostname']);
+}
 if (!empty($_PM_['proxy']['prepend_path'])
         && (isset($_SERVER[$_PM_['proxy']['server_param']]) && $_SERVER[$_PM_['proxy']['server_param']] == $_PM_['proxy']['server_value'])) {
     define('PHP_SELF', (!empty($_SERVER['SCRIPT_NAME']))
             ? $_PM_['proxy']['prepend_path'].'/'.$_SERVER['SCRIPT_NAME']
-            : $_PM_['proxy']['prepend_path'].'/'.$_SERVER['PHP_SELF']);
-    if (!empty($_PM_['proxy']['proxy_hostname'])) {
-        define('PHM_SERVERNAME', $_PM_['proxy']['proxy_hostname']);
-    }
+            : $_PM_['proxy']['prepend_path'].'/'.$_SERVER['PHP_SELF']); 
 } else {
     define('PHP_SELF', (!empty($_SERVER['SCRIPT_NAME'])) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF']);
 }
