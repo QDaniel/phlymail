@@ -33,6 +33,17 @@ if (file_exists($_PM_['path']['conf'].'/global.choices.ini.php')) {
 if (file_exists($_PM_['path']['conf'].'/choices.ini.php')) {
     $_PM_ = merge_PM($_PM_, parse_ini_file($_PM_['path']['conf'].'/choices.ini.php', true));
 }
+
+if(!empty($_PM_['proxy']['enable'])) {
+    if ((isset($_SERVER['HTTPS']) && (($_SERVER['HTTPS'] == 'on') || ($_SERVER['HTTPS'] == '1'))) || (isset($_SERVER['HTTPS']) && $_SERVER['SERVER_PORT'] == 443)) {
+        $_SERVER['HTTPS'] = true;
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+        $_SERVER['HTTPS'] = true;
+    } else {
+        $_SERVER['HTTPS'] = false;
+    }
+}
+
 // System is configured to enforce use of HTTPS
 if (!empty($_PM_['auth']['force_ssl']) && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != 'on')) {
     header('HTTP/1.1 301 Moved Permanently - Please update any bookmarks or links');
@@ -47,14 +58,14 @@ date_default_timezone_set(@date_default_timezone_get());
 
 $DB = new DB_Base();
 // Handling special proxy calls here. Very often used for SSL calls thorugh an SSL proxy used for all instances of a hoster
+if (!empty($_PM_['proxy']['proxy_hostname'])) {
+    define('PHM_SERVERNAME', $_PM_['proxy']['proxy_hostname']);
+}
 if (!empty($_PM_['proxy']['prepend_path'])
         && (isset($_SERVER[$_PM_['proxy']['server_param']]) && $_SERVER[$_PM_['proxy']['server_param']] == $_PM_['proxy']['server_value'])) {
     define('PHP_SELF', (!empty($_SERVER['SCRIPT_NAME']))
             ? $_PM_['proxy']['prepend_path'].'/'.$_SERVER['SCRIPT_NAME']
             : $_PM_['proxy']['prepend_path'].'/'.$_SERVER['PHP_SELF']);
-    if (!empty($_PM_['proxy']['proxy_hostname'])) {
-        define('PHM_SERVERNAME', $_PM_['proxy']['proxy_hostname']);
-    }
     $_SERVER['REQUEST_URI'] = $_PM_['proxy']['prepend_path'].$_SERVER['REQUEST_URI'];
 } else {
     define('PHP_SELF', (!empty($_SERVER['SCRIPT_NAME'])) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF']);
