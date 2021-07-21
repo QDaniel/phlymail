@@ -22,7 +22,6 @@ if (!isset($_SESSION['phM_perm_read']['users_']) && !$_SESSION['phM_superroot'])
 }
 $whattodo = (isset($_REQUEST['whattodo'])) ? $_REQUEST['whattodo'] : false;
 $uid = (isset($_REQUEST['uid'])) ? $_REQUEST['uid'] : null;
-$accid = (isset($_REQUEST['accid'])) ? $_REQUEST['accid'] : null;
 $mode = (isset($_REQUEST['mode'])) ? $_REQUEST['mode'] : false;
 $Acnt = new DB_Controller_Account();
 $WP_return = false;
@@ -173,7 +172,6 @@ if (($mode == 'saveold' || $mode == 'savenew') && (isset($_SESSION['phM_perm_wri
                     'uid' => (int) $_REQUEST['uid'],
                     'accname' => $_REQUEST['popname'],
                     'checkevery' => (int) $_REQUEST['checkevery'],
-                    'accid' => $Acnt->getMaxAccountId($_REQUEST['uid']),
                     'checkspam' => isset($_REQUEST['checkspam']) ? (int) $_REQUEST['checkspam'] : 0,
                     'acctype' => $acctype,
                     'sig_on' => isset($_REQUEST['sig_on']) ? $_REQUEST['sig_on'] : 0,
@@ -220,7 +218,7 @@ if (($mode == 'saveold' || $mode == 'savenew') && (isset($_SESSION['phM_perm_wri
         if ('saveold' == $mode) {
             if (!$Acnt->updateAccount(array
                     ('uid' => $_REQUEST['uid']
-                    ,'accid' => $account
+                    ,'id' => $account
                     ,'accname' => $_REQUEST['popname']
                     ,'checkevery' => $_REQUEST['checkevery']
                     ,'checkspam' => isset($_REQUEST['checkspam']) ? $_REQUEST['checkspam'] : 0
@@ -310,12 +308,12 @@ if ($mode == 'profiles' && (isset($_SESSION['phM_perm_write']['users_']) || $_SE
     $defacc = array();
     $t_b = $tpl->get_block('menline');
     foreach ($Acnt->getAccountIndex($_REQUEST['uid'], true, false) as $k => $v) {
-        $t_b->assign(array('profilenm' => phm_entities($v['accname']), 'id' => $v['accid'], 'msg_del' => $WP_msg['del']));
+        $t_b->assign(array('profilenm' => phm_entities($v['accname']), 'id' => $v['id'], 'msg_del' => $WP_msg['del']));
         $t_b->assign_block($v['acctype'] == 'pop3' ? 'acctype_pop3' : 'acctype_imap');
         $tpl->assign('menline', $t_b);
         $t_b->clear();
         // Save data for default account selection below
-        $defacc[$v['accid']] = $v['accname'];
+        $defacc[$v['id']] = $v['accname'];
     }
     // Selection of default account
     if (!empty($defacc)) {

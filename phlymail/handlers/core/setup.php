@@ -769,7 +769,6 @@ if (($mode == 'saveold' && ($_SESSION['phM_privs']['all'] || $_SESSION['phM_priv
                     ('uid' => $_SESSION['phM_uid']
                     ,'accname' => $_REQUEST['popname']
                     ,'checkevery' => $_REQUEST['checkevery']
-                    ,'accid' => $Acnt->getMaxAccountId($_SESSION['phM_uid'])
                     ,'checkspam' => isset($_REQUEST['checkspam']) ? $_REQUEST['checkspam'] : 0
                     ,'acctype' => $acctype
                     ,'sig_on' => isset($_REQUEST['sig_on']) ? $_REQUEST['sig_on'] : 0
@@ -816,7 +815,7 @@ if (($mode == 'saveold' && ($_SESSION['phM_privs']['all'] || $_SESSION['phM_priv
         if ('saveold' == $mode) {
             if (!$Acnt->updateAccount(array
                     ('uid' => $_SESSION['phM_uid']
-                    ,'accid' => $account
+                    ,'id' => $account
                     ,'accname' => $_REQUEST['popname']
                     ,'checkevery' => $_REQUEST['checkevery']
                     ,'checkspam' => isset($_REQUEST['checkspam']) ? $_REQUEST['checkspam'] : 0

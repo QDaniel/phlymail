@@ -31,14 +31,14 @@ class DB_Controller_Account extends DB_Controller
     {
         $return = array();
         $q_r = ($protocol) ? ' AND `acctype`="'.$this->esc($protocol).'"' : '';
-        $qid = $this->query('SELECT `id`, `accid`, `accname`, `acctype` FROM '.$this->Tbl['profiles']
-                .' WHERE uid='.intval($uid).$q_r.' ORDER BY `order` ASC, `accid` ASC');
+        $qid = $this->query('SELECT `id`, `accname`, `acctype` FROM '.$this->Tbl['profiles']
+                .' WHERE uid='.intval($uid).$q_r.' ORDER BY `order` ASC, `accname` ASC');
         if ($qid) {
             while ($line = $this->assoc($qid)) {
             	if ($extended) {
                 	$return[$line['id']] = $line;
             	} else {
-            		$return[$line['accid']] = $line['accname'];
+            		$return[$line['id']] = $line['accname'];
             	}
             }
         }
@@ -57,9 +57,9 @@ class DB_Controller_Account extends DB_Controller
      * - signature  blob signature
      * - aliases  array (aid => int, real_name => string, email => string)
      */
-    public function getAccount($uid = 0, $accid = 0, $real_id = 0)
+    public function getAccount($uid = 0, $real_id = 0)
     {
-        $q_r = ($real_id) ? '`id`='.intval($real_id) : 'uid='.intval($uid).' AND accid='.intval($accid);
+        $q_r = empty($uid) ? '`id`='.intval($real_id) : '`id`='.intval($real_id).' AND (uid='.intval($uid).' OR public=1)';
         $return = $this->assoc($this->query('SELECT * FROM '.$this->Tbl['profiles'].' WHERE '.$q_r));
         if (empty($return)) {
             return false;
@@ -109,7 +109,7 @@ class DB_Controller_Account extends DB_Controller
             return $return;
         }
         $qid = $this->query('SELECT `aid`,`real_name`,`email`,`signature`,`sendvcf` FROM '.$this->Tbl['aliases']
-                .' WHERE uid='.$return['uid'].' AND profile='.$return['accid']);
+                .' WHERE uid='.$return['uid'].' AND profile='.$return['id']);
         while ($alias = $this->assoc($qid)) {
             $return['aliases'][$alias['aid']] = $alias;
         }
@@ -124,13 +124,14 @@ class DB_Controller_Account extends DB_Controller
      */
     public function setLoginTime($uid = false, $accid = false, $pid = false)
     {
+        return;
         if (!$uid) {
             return;
         }
         if (!$accid && !$pid) {
             return;
         }
-        $q_r = ($accid) ? ' AND accid='.intval($accid) : ' AND `id`='.intval($pid);
+        $q_r = ($accid) ? ' AND `id`='.intval($accid) : ' AND `id`='.intval($pid);
         return $this->query('UPDATE '.$this->Tbl['profiles'].' set logintime=NOW() WHERE uid='.intval($uid).$q_r);
     }
 
@@ -139,7 +140,7 @@ class DB_Controller_Account extends DB_Controller
     // Returns: Account ID if exists, FALSE otherwise
     public function AccountNameExists($uid, $accname = '')
     {
-        list ($exists) = $this->fetchrow($this->query('SELECT accid FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND accname="'.$this->esc($accname).'"'));
+        list ($exists) = $this->fetchrow($this->query('SELECT id FROM '.$this->Tbl['profiles'].' WHERE accname="'.$this->esc($accname).'" AND (uid='.intval($uid).' OR publlic=1)'));
         return ($exists) ? $exists : false;
     }
 
@@ -150,11 +151,6 @@ class DB_Controller_Account extends DB_Controller
      */
     public function addAccount($input)
     {
-        list ($input['accid']) = $this->fetchrow($this->query('SELECT max(accid)+1 FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($input['uid'])));
-        if ($input['accid'] == 0) {
-            $input['accid'] = 1;
-        }
-
         if ($this->DB['secaccpass']) {
             $input['poppass'] = $this->confuse($input['poppass'], $input['popserver'].$input['popport'].$input['popuser']);
         }
@@ -164,12 +160,12 @@ class DB_Controller_Account extends DB_Controller
         $input['userheaders'] = isset($input['userheaders']) ? serialize($input['userheaders']) : '';
 
         $qid = $this->query('INSERT '.$this->Tbl['profiles']
-                .' (uid,accid,acctype,accname,sig_on,popserver,popport,popuser,poppass,popsec'
+                .' (uid,public,acctype,accname,sig_on,popserver,popport,popuser,poppass,popsec'
                 .',smtpserver,smtpport,smtpuser,smtppass,smtpsec,real_name,address,signature,leaveonserver'
                 .',localkillserver,cachetype,checkspam,checkevery,inbox,sent,drafts,waste,junk,templates,archive'
                 .',onlysubscribed,trustspamfilter,imapprefix,userheaders,sendvcf'
                 .',popallowselfsigned,smtpallowselfsigned) values ('
-                .'"'.intval($input['uid']).'","'.intval($input['accid']).'","'.$this->esc($input['acctype']).'"'
+                .'"'.intval($input['uid']).'","0","'.$this->esc($input['acctype']).'"'
                 .',"'.$this->esc($input['accname']).'"'
                 .',"'.$this->esc($input['sig_on']).'","'.$this->esc($input['popserver']).'"'
                 .',"'.intval($input['popport']).'","'.$this->esc($input['popuser']).'"'
@@ -205,7 +201,7 @@ class DB_Controller_Account extends DB_Controller
             if ($input['acctype'] == 'imap') {
                 $Cron->setJob('email', 'syncfoldertree', $pid, 1, 50);
             }
-            return $input['accid'];
+            return $input['id'];
         }
         return false;
     }
@@ -218,7 +214,7 @@ class DB_Controller_Account extends DB_Controller
     public function updateAccount($input)
     {
         $sql = 'SELECT p.`id` FROM '.$this->Tbl['profiles'].' p'
-                .' WHERE p.`uid`='.intval($input['uid']).' AND p.`accid`='.intval($input['accid']);
+                .' WHERE p.`uid`='.intval($input['uid']).' AND p.`id`='.intval($input['id']);
         list ($pid) = $this->fetchrow($this->query($sql));
 
         $Cron = new DB_Controller_Cron();
@@ -268,7 +264,7 @@ class DB_Controller_Account extends DB_Controller
     public function deleteAccount($uid, $accountnumber)
     {
         $sql = 'SELECT p.`id` FROM '.$this->Tbl['profiles'].' p'
-                .' WHERE p.`uid`='.intval($uid).' AND p.`accid`='.intval($accountnumber);
+                .' WHERE p.`uid`='.intval($uid).' AND p.`id`='.intval($accountnumber);
         list ($pid) = $this->fetchrow($this->query($sql));
 
         $Cron = new DB_Controller_Cron();
@@ -281,9 +277,9 @@ class DB_Controller_Account extends DB_Controller
         return false;
     }
 
-    public function convertAccount($uid, $accid)
+    public function convertAccount($uid, $id)
     {
-        $query = 'UPDATE '.$this->Tbl['profiles'].' SET `acctype`=IF(`acctype`="imap", "pop3", "imap") WHERE uid='.intval($uid).' AND `accid`='.intval($accid);
+        $query = 'UPDATE '.$this->Tbl['profiles'].' SET `acctype`=IF(`acctype`="imap", "pop3", "imap") WHERE uid='.intval($uid).' AND `id`='.intval($aid);
         return ($this->query($query));
     }
 
@@ -297,7 +293,7 @@ class DB_Controller_Account extends DB_Controller
         $uid = intval($uid);
         $oldMap = array();
         foreach ($this->getAccountIndex($uid, true, null) as $id => $arr) {
-            $oldMap[$arr['accid']] = $id;
+            $oldMap[$arr['id']] = $id;
         }
         foreach ($input as $k => $v) {
             $this->query('UPDATE '.$this->Tbl['profiles'].' SET `order`='.($v).' WHERE `id`='.$oldMap[intval($k)].' AND `uid`='.$uid);
@@ -311,11 +307,7 @@ class DB_Controller_Account extends DB_Controller
     // Returns: integer next possible profile id
     public function getMaxAccountId($uid = false)
     {
-        if (false === $uid) {
-            return 1;
-        }
-        list ($curr) = $this->fetchrow($this->query('SELECT max(accid) FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid)));
-        return ($curr+1);
+        return 1;       
     }
 
     /**
@@ -341,7 +333,7 @@ class DB_Controller_Account extends DB_Controller
         }
         $where .= ') LIMIT 1';
 
-        $query = 'SELECT accid, 0 FROM '.$this->Tbl['profiles'].str_replace('<<<$1>>>', 'address', $where);
+        $query = 'SELECT id, 0 FROM '.$this->Tbl['profiles'].str_replace('<<<$1>>>', 'address', $where);
         $return = $this->fetchrow($this->query($query));
         if (!$return[0]) {
             $query = 'SELECT profile, aid FROM '.$this->Tbl['aliases'].str_replace('<<<$1>>>', 'email', $where);
@@ -358,10 +350,9 @@ class DB_Controller_Account extends DB_Controller
      * @return int
      * @since 3.7.1
      */
-    public function getProfileFromAccountId($uid, $accid)
+    public function getProfileFromAccountId($uid, $id)
     {
-        list ($return) = $this->fetchrow($this->query('SELECT `id` FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND accid='.intval($accid)));
-        return $return;
+        return $id;
     }
 
     /**
@@ -374,8 +365,7 @@ class DB_Controller_Account extends DB_Controller
      */
     public function getAccountIdFromProfile($uid, $id)
     {
-        list ($return) = $this->fetchrow($this->query('SELECT `accid` FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND `id`='.intval($id)));
-        return $return;
+        return $id;
     }
 
     /**
@@ -389,7 +379,7 @@ class DB_Controller_Account extends DB_Controller
     {
         $return = false;
         if (isset($settings['core']['default_profile']) && $settings['core']['default_profile']) {
-            $query = 'SELECT address FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND accid='.intval($settings['core']['default_profile']);
+            $query = 'SELECT address FROM '.$this->Tbl['profiles'].' WHERE id='.intval($settings['core']['default_profile'].'AND (uid='.intval($uid).' OR public=1) ');
             list ($return) = $this->fetchrow($this->query($query));
         }
         if (!$return) {
@@ -505,11 +495,11 @@ class DB_Controller_Account extends DB_Controller
         if (!$hkey) {
             return false;
         }
-        list ($uheads) = $this->fetchrow($this->query('SELECT userheaders FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND accid='.intval($pid)));
+        list ($uheads) = $this->fetchrow($this->query('SELECT userheaders FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND id='.intval($pid)));
         $uheads = ($uheads) ? unserialize($uheads) : array();
         $uheads[$hkey] = $hval;
         $uheads = serialize($uheads);
-        $query = 'UPDATE '.$this->Tbl['profiles'].' SET userheaders="'.$this->esc($uheads).'" WHERE uid='.intval($uid).' AND accid='.intval($pid);
+        $query = 'UPDATE '.$this->Tbl['profiles'].' SET userheaders="'.$this->esc($uheads).'" WHERE uid='.intval($uid).' AND id='.intval($pid);
         return $this->query($query);
     }
 
@@ -528,14 +518,14 @@ class DB_Controller_Account extends DB_Controller
         if (!$hkey) {
             return;
         }
-        list ($uheads) = $this->fetchrow($this->query('SELECT userheaders FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND accid='.intval($pid)));
+        list ($uheads) = $this->fetchrow($this->query('SELECT userheaders FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND `id`='.intval($pid)));
         $uheads = ($uheads) ? unserialize($uheads) : array();
         if ($hkey != $oldkey) {
             unset($uheads[$oldkey]);
         }
         $uheads[$hkey] = $hval;
         $uheads = serialize($uheads);
-        $query = 'UPDATE '.$this->Tbl['profiles'].' SET userheaders="'.$this->esc($uheads).'" WHERE uid='.intval($uid).' AND accid='.intval($pid);
+        $query = 'UPDATE '.$this->Tbl['profiles'].' SET userheaders="'.$this->esc($uheads).'" WHERE uid='.intval($uid).' AND `id`='.intval($pid);
         return $this->query($query);
     }
 
@@ -551,11 +541,11 @@ class DB_Controller_Account extends DB_Controller
         if (!$hkey) {
             return;
         }
-        list ($uheads) = $this->fetchrow($this->query('SELECT userheaders FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND accid='.intval($pid)));
+        list ($uheads) = $this->fetchrow($this->query('SELECT userheaders FROM '.$this->Tbl['profiles'].' WHERE uid='.intval($uid).' AND `id`='.intval($pid)));
         $uheads = ($uheads) ? unserialize($uheads) : array();
         unset($uheads[$hkey]);
         $uheads = serialize($uheads);
-        $query = 'UPDATE '.$this->Tbl['profiles'].' SET userheaders="'.$this->esc($uheads).'" WHERE uid='.intval($uid).' AND accid='.intval($pid);
+        $query = 'UPDATE '.$this->Tbl['profiles'].' SET userheaders="'.$this->esc($uheads).'" WHERE uid='.intval($uid).' AND `id`='.intval($pid);
         return $this->query($query);
     }
 
