@@ -38,6 +38,17 @@ if (!empty($_REQUEST['nossl'])) {
     $_PM_['core']['pass_through'][] = 'nossl';
     $_PM_['auth']['force_ssl'] = false;
 }
+
+if(!empty($_PM_['proxy']['enable'])) {
+    if ((isset($_SERVER['HTTPS']) && (($_SERVER['HTTPS'] == 'on') || ($_SERVER['HTTPS'] == '1'))) || (isset($_SERVER['HTTPS']) && $_SERVER['SERVER_PORT'] == 443)) {
+        $_SERVER['HTTPS'] = true;
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+        $_SERVER['HTTPS'] = true;
+    } else {
+        $_SERVER['HTTPS'] = false;
+    }
+}
+
 define('PHM_FORCE_SSL', !empty($_PM_['auth']['force_ssl']));
 
 // System is configured to enforce use of HTTPS
