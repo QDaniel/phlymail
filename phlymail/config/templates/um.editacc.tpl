@@ -660,7 +660,7 @@ $(document).ready(function() {
     </div>
     <div style="float:left;">
         <form name="mainform" onsubmit="saveprofile();" action="#" method="get">
-            <div id="navcont" style="display:none;text-align:left;width:530px;height:246px;">
+            <div id="navcont" style="display:none;text-align:left;width:600px;height:246px;">
                 <div id="tabpane" class="ui-tabpane" style="height:226px;">
                     <ul>
                         <li><a href="#generic"><span>{msg_generic}</span></a></li>
