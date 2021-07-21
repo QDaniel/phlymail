@@ -42,6 +42,8 @@ function extauth($user, $pass, &$_PM_)
     if (!isset($_PM_['extauth']['ldap_server'])){
         return array(-2, 'Check your setup');
     }
+
+
     $localpart = $realm = '';
     if (preg_match('!^(.+)\@(.+)$!', $user, $found)) {
         $localpart = $found[1];
@@ -60,7 +62,14 @@ function extauth($user, $pass, &$_PM_)
             ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
             ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
         }
-        if (!@ldap_bind($ldap, $user, $pass)) return array(0, $GLOBALS['WP_msg']['wrongauth'].' '.$user);
+
+        $tpldn = empty($_PM_['extauth']['ldap_dn']) ? "{username}" : $_PM_['extauth']['ldap_dn'];
+        if (strpos($tpldn, '{username}') === false) {
+            $tpldn = 'cn={username},' . $tpldn;
+        }
+        $binddn = str_replace('{username}', $user, $tpldn);
+
+        if (!@ldap_bind($ldap, $binddn, $pass)) return array(0, $GLOBALS['WP_msg']['wrongauth'].' '.$user);
         ldap_close($ldap);
     }
     // All well, return success
