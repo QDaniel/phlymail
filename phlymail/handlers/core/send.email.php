@@ -551,7 +551,7 @@ if (isset($_REQUEST['WP_do']) && 'save' == $_REQUEST['WP_do']) {
     $save_class = 'handler_'.$save_handler.'_api';
     $SAVE = new $save_class($_PM_, $_SESSION['phM_uid']);
     $profile = $Acnt->getProfileFromAccountId($_SESSION['phM_uid'], $WP_send['from_profile']);
-    $profinfo = $Acnt->getAccount($_SESSION['phM_uid'], false, $profile);
+    $profinfo = $Acnt->getAccount($_SESSION['phM_uid'], $profile);
     if (isset($_REQUEST['draft']) && $_REQUEST['draft']) {
         $fallback = $profFolder = $defaultFolder = 'drafts';
     } elseif (isset($_REQUEST['template']) && $_REQUEST['template']) {
@@ -629,7 +629,7 @@ if (isset($_REQUEST['WP_do']) && 'send_dsn' == $_REQUEST['WP_do']) {
     }
 
     if (!empty($WP_send['prof'])) {
-        $connect = $Acnt->getAccount($_SESSION['phM_uid'], false, $WP_send['prof']);
+        $connect = $Acnt->getAccount($_SESSION['phM_uid'], $WP_send['prof']);
         $WP_send['from'] = $connect['address'];
         // If we have SMTP connection data for this profile, put this into session, else try to use the default
         // connection data

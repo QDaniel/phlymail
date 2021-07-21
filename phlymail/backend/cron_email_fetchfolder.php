@@ -100,7 +100,7 @@ class cron_email_fetchfolder
 
         list($acntID, $pathIMAP) = explode(':', $info['folder_path']);
         $Acnt = new DB_Controller_Account();
-        $accdata = $Acnt->getAccount(null, null, $acntID);
+        $accdata = $Acnt->getAccount(null, $acntID);
 
         $CONN = new Protocol_Client_IMAP($accdata['popserver'], $accdata['popport'], 0, $accdata['popsec'], $accdata['popallowselfsigned']);
         if (true !== $CONN->check_connected()) { // Connection failed

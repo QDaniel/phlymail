@@ -457,7 +457,7 @@ class handler_email_driver {
         }
         // Find out about the profile. In case of POP3, the system folder is a local one
         $Acnt = new DB_Controller_Account();
-        $accdata = $Acnt->getAccount($this->uid, false, $profile);
+        $accdata = $Acnt->getAccount($this->uid, $profile);
         if (!$profile || !$accdata || $accdata['acctype'] == 'pop3') {
             $profile = 0;
         }
@@ -1536,7 +1536,7 @@ class handler_email_driver {
                 // IMAP folder -> Find the wastebin of this respective IMAP mailbox
                 $profile = explode(':', $info['folder_path'], 2);
                 $Acnt = new DB_Controller_Account();
-                $accdata = $Acnt->getAccount($this->uid, false, $profile[0]);
+                $accdata = $Acnt->getAccount($this->uid, $profile[0]);
                 $waste = $accdata['waste'];
                 if (0 != $waste) { // The user defined a Junk folder for that profiel -> try to use it
                     $folderInfo = $this->get_folder_info($waste);
@@ -1617,7 +1617,7 @@ class handler_email_driver {
 
             $profile = explode(':', $info['folder_path'], 2);
             $Acnt = new DB_Controller_Account();
-            $accdata = $Acnt->getAccount($this->uid, false, $profile[0]);
+            $accdata = $Acnt->getAccount($this->uid, $profile[0]);
             $archive = $accdata['archive'];
             if (0 != $archive) {
                 // The user defined an archive folder for that profile -> try to use it

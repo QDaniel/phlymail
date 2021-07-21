@@ -519,7 +519,7 @@ if (!empty($userdata['email'])) {
 }
 $Acnt = new DB_Controller_Account();
 foreach ($Acnt->getAccountIndex($_SESSION['phM_uid'], true, false) as $k => $v) {
-    $accdata = $Acnt->getAccount($_SESSION['phM_uid'], false, $k);
+    $accdata = $Acnt->getAccount($_SESSION['phM_uid'], $k);
     if ($accdata['address']) {
         $available_eamils[$accdata['address']] = 1;
     }

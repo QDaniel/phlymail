@@ -121,7 +121,7 @@ if (!empty($_REQUEST['what']) && isset($_REQUEST['mail'])) {
         $xmplInfo = $FS->get_mail_info($xmpl, true, false);
         $xmplFld = $FS->get_folder_info($xmplInfo['folder_id']);
         if (preg_match('!^(\d+)\:!', $xmplFld['folder_path'], $found)) { // This is an IMAP folder
-            $accdata = $Acnt->getAccount($myUid, null, $found[1]);
+            $accdata = $Acnt->getAccount($myUid, $found[1]);
             $profFolder = $accdata[$folder];
             if (0 != $profFolder) { // The user defined a Junk folder for that profile -> try to use it
                 $folderInfo = $FS->get_folder_info($profFolder);

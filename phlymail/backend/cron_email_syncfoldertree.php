@@ -21,7 +21,7 @@ class cron_email_syncfoldertree
     public function Run()
     {
         $Acnt = new DB_Controller_Account();
-        $accdata = $Acnt->getAccount(null, null, $this->job['item']);
+        $accdata = $Acnt->getAccount(null, $this->job['item']);
         if (empty($accdata)) {
             $Cron = new DB_Controller_Cron();
             $Cron->removeJob($this->job['handler'], $this->job['job'], $this->job['item']);

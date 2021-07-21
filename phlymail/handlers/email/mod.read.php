@@ -449,7 +449,7 @@ if (isset($_PM_['core']['mdn_behaviour']) && 'none' != $_PM_['core']['mdn_behavi
     if (isset($_PM_['core']['systememail'])) {
         $dsn_from = $_PM_['core']['systememail'];
     } else {
-        $accdata = $Acnt->getAccount($uid, false, $mailinfo['profile']);
+        $accdata = $Acnt->getAccount($uid, $mailinfo['profile']);
         $dsn_from = $accdata['address'];
     }
     $mdn_uri = $corebase.'&l=send_email&WP_do=send_dsn&mail='.$id

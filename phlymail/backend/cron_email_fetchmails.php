@@ -74,7 +74,7 @@ class cron_email_fetchmails
         $_PM_     = $this->_PM_;
         $job      = $this->job;
         $Acnt     = new DB_Controller_Account();
-        $accdata = $Acnt->getAccount(null, null, $job['item']);
+        $accdata = $Acnt->getAccount(null, $job['item']);
         if (empty($accdata)) {
             return;
         }

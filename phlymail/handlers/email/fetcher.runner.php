@@ -44,7 +44,7 @@ if ($step == 1) {
         session_write_close();
         $f = $FS->get_folder_info(intval($_REQUEST['folder']));
         list ($pid, $folder) = explode(':', $f['folder_path'], 2);
-        $accdata = $Acnt->getAccount(false, false, $pid);
+        $accdata = $Acnt->getAccount(false, $pid);
         $CONN = new Protocol_Client_IMAP($accdata['popserver'], $accdata['popport'], 0, $accdata['popsec'], $accdata['popallowselfsigned']);
         // Connection failed
         if ($CONN->check_connected() !== true) {
@@ -183,7 +183,7 @@ if ($step == 1) {
 
     // Step 1.2 (explicit and implicit)
     foreach ($profiles as $pid => $accdet) {
-        $accdata = $Acnt->getAccount(false, false, $pid);
+        $accdata = $Acnt->getAccount(false, $pid);
         // Quota exceeded, no longer check POP3 accounts for new mails during this period
         if ($accdata['acctype'] == 'pop3' && $quota_reached) {
             unset($profiles[$pid]);
@@ -222,7 +222,7 @@ if (2 == $step) {
     $pid = intval($_REQUEST['pid']);
     // Get the data
     $localkills = array();
-    $accdata = $Acnt->getAccount(false, false, $pid);
+    $accdata = $Acnt->getAccount(false, $pid);
     if ($accdata['acctype'] == 'pop3') {
         $CONN = new Protocol_Client_POP3($accdata['popserver'], $accdata['popport'], 0, $accdata['popsec'], $accdata['popallowselfsigned']);
         if ($CONN->check_connected() !== true) { // Connection failed
@@ -327,7 +327,7 @@ if (3 == $step) {
         $uidl = false;
         $folder = 'INBOX';
     }
-    $accdata = $Acnt->getAccount(false, false, $pid);
+    $accdata = $Acnt->getAccount(false, $pid);
     if ($accdata['acctype'] == 'pop3') {
         // Prevent doublette downloads of mails probably already downloaded by another process
         if ($accdata['leaveonserver']) {
