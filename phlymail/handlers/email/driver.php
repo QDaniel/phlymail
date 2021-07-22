@@ -1973,6 +1973,7 @@ class handler_email_driver {
             return false;
         }
         $folders = $mbox->listMailbox('', '*', $mbox->onlysubscribed);
+        print_r($folders);
         if (!is_array($folders)) {
             $this->IDX->update_folder(array('id' => $stored['id'], 'uid' => $this->uid, 'stale' => '1'));
             return false;
@@ -2141,6 +2142,7 @@ class handler_email_driver {
             if (is_null($exists) || !$exists) {
                 $id = $this->IDX->create_folder(array
                         ('uid' => $this->uid
+                        ,'acc_id' => $stored['acc_id']
                         ,'friendly_name' => ($data['icon'] == ':imapbox') ? $data['friendly_name'] : uctc::convert($data['friendly_name'], 'utf7imap', 'utf8')
                         ,'folder_path' => $mbox->profnum.':'.$data['folder_path']
                         ,'childof' => $index[$data['childof']]['real_id']

@@ -239,7 +239,7 @@ class handler_email_indexer extends DB_Controller
         if (!$this->check_perm_folder($uid, $folder)) {
             return false;
         }
-        $query = 'SELECT friendly_name foldername, uid, uuid, childof, folder_path, att_type `type`, att_icon icon'
+        $query = 'SELECT friendly_name foldername, uid, acc_id, uuid, childof, folder_path, att_type `type`, att_icon icon'
                 .',att_has_folders has_folders, att_has_items has_items'
                 .',mailnum, mailsize,`unread`,`unseen`,`visible`,`secure`'
                 .' FROM '.$this->Tbl['email_folder'].' WHERE idx='.intval($folder);
@@ -1849,6 +1849,7 @@ class handler_email_indexer extends DB_Controller
      */
     protected function check_perm_folder($uid, $folder, $mode = 'r')
     {
+        return true;
         // Bypass in any cases, where previous operations already ruled out the user ID
         if (is_null($uid) || false == $uid) return true;
         // Directly owned by this user?
