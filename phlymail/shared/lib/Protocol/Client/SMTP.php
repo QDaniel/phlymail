@@ -569,6 +569,8 @@ class Protocol_Client_SMTP extends Protocol_Client_Base
             $found[3] = strtolower(str_replace('-',  '_',  trim($found[3])));
             return explode(' ', $found[3]);
         }
+        $this->diag('get_supported_sasl_mechanisms: '.print_r($found, true));
+        $this->diag('get_supported_sasl_mechanisms: '.print_r($response, true));
         return array();
     }
 
