@@ -542,6 +542,7 @@ class handler_email_driver {
         // Create folder's index and retrieve its ID
         $new_folder = $this->IDX->create_folder(array
                 ('uid' => $this->uid
+                ,'acc_id' => 0
                 ,'friendly_name' => $folder
                 ,'folder_path' => ''
                 ,'childof' => 0

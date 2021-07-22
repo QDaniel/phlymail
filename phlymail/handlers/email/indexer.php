@@ -120,7 +120,7 @@ class handler_email_indexer extends DB_Controller
   
         $return = array();  
         if(count($ids)<1) return $return;
-        
+
       $syssorter = 'CASE att_icon WHEN ":inbox" THEN 0 WHEN ":outbox" THEN 1 WHEN ":drafts" THEN 2 WHEN ":templates" THEN 3'
                 .' WHEN ":sent" THEN 4 WHEN ":waste" THEN 5 WHEN ":junk" THEN 6 WHEN ":archive" THEN 7 WHEN ":mailbox" THEN 0'
                 .' WHEN ":imapbox" THEN 1 ELSE 8 END';
@@ -351,6 +351,7 @@ class handler_email_indexer extends DB_Controller
     {
         // On clean implementation you should not fail here
         if (!isset($pass['uid']))           return false;
+        if (!isset($pass['acc_id']))        return false;
         if (!isset($pass['friendly_name'])) return false;
         if (!isset($pass['folder_path']))   return false;
         if (!isset($pass['childof']))       return false;
@@ -374,6 +375,7 @@ class handler_email_indexer extends DB_Controller
         $qid = $this->query('SELECT max(layered_id) FROM '.$this->Tbl['email_folder'].' WHERE childof='.intval($pass['childof']));
         list ($max_layered) = $this->fetchrow($qid);
         $query = 'INSERT INTO '.$this->Tbl['email_folder'].' SET uid='.intval($pass['uid'])
+                .',acc_id='.intval($pass['acc_id'])
                 .',`uuid`="'.basics::uuid().'"'
                 .',friendly_name="'.$this->esc($pass['friendly_name']).'"'
                 .',folder_path="'.$this->esc($pass['folder_path']).'"'

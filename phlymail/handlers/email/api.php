@@ -49,7 +49,7 @@ class handler_email_api
      */
     public function create_imapbox($folder, $profile)
     {
-        $status = $this->STOR->create_folder($folder, 0, 10, ':imapbox', true, false, $profile.':');
+        $status = $this->STOR->create_folder($profile, $folder, 0, 10, ':imapbox', true, false, $profile.':');
         if ($status) {
             $this->STOR->init_folders(true, $profile);
         }
