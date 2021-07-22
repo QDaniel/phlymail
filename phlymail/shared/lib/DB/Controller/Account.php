@@ -32,7 +32,7 @@ class DB_Controller_Account extends DB_Controller
         $return = array();
         $q_r = ($protocol) ? ' AND `acctype`="'.$this->esc($protocol).'"' : '';
         $qid = $this->query('SELECT `id`, `accname`, `acctype` FROM '.$this->Tbl['profiles']
-                .' WHERE (uid='.intval($uid).'OR public=1)'.$q_r.' ORDER BY `order` ASC, `accname` ASC');
+                .' WHERE (uid='.intval($uid).' OR public=1)'.$q_r.' ORDER BY `order` ASC, `accname` ASC');
         if ($qid) {
             while ($line = $this->assoc($qid)) {
             	if ($extended) {
