@@ -140,7 +140,7 @@ class DB_Controller_Account extends DB_Controller
     // Returns: Account ID if exists, FALSE otherwise
     public function AccountNameExists($uid, $accname = '')
     {
-        list ($exists) = $this->fetchrow($this->query('SELECT id FROM '.$this->Tbl['profiles'].' WHERE accname="'.$this->esc($accname).'" AND (uid='.intval($uid).' OR publlic=1)'));
+        list ($exists) = $this->fetchrow($this->query('SELECT id FROM '.$this->Tbl['profiles'].' WHERE accname="'.$this->esc($accname).'" AND (uid='.intval($uid).' OR public=1)'));
         return ($exists) ? $exists : false;
     }
 
