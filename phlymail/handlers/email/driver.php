@@ -358,7 +358,7 @@ class handler_email_driver {
      * @see  indexer::create_folder()
      * @see  indexer::update_folder()
      */
-    public function create_folder($folder, $childof, $type = 1, $icon = '', $has_folders = true, $has_items = true, $path = '')
+    public function create_folder($profile, $folder, $childof, $type = 1, $icon = '', $has_folders = true, $has_items = true, $path = '')
     {
         if (!$folder || false === $childof || is_null($childof)) {
             return false;
@@ -409,6 +409,7 @@ class handler_email_driver {
             // Create folder's index and retrieve its ID
             $new_folder = $this->IDX->create_folder(array(
                     'uid' => $this->uid,
+                    'acc_id' => $profile,
                     'friendly_name' => $fragment,
                     'folder_path' => ($path != '') ? $path : '',
                     'childof' => $myChildOf,
@@ -463,7 +464,8 @@ class handler_email_driver {
         }
         if ($profile == 0) {
             return $this->create_folder
-                    ($GLOBALS['WP_msg'][$this->sysfolders[$type]['msg']]
+                    ($profile,
+                    $GLOBALS['WP_msg'][$this->sysfolders[$type]['msg']]
                     ,$this->IDX->get_system_folder($this->uid, 'mailbox', 0)
                     ,0
                     ,$this->sysfolders[$type]['icon']
@@ -475,7 +477,8 @@ class handler_email_driver {
             if (!$this->sysfolders[$type]['imap']) return; // Not possible in IMAP
             // First try the INBOX folder
             $state = $this->create_folder
-                    ($this->sysfolders[$type]['imap']
+                    ($profile,
+                    $this->sysfolders[$type]['imap']
                     ,$this->IDX->get_folder_id_from_path($this->uid, $profile.':INBOX')
                     ,10
                     ,$this->sysfolders[$type]['icon']
@@ -485,7 +488,8 @@ class handler_email_driver {
             if ($state) return true;
             // Didn't do, try the root folder
             $this->create_folder
-                    ($this->sysfolders[$type]['imap']
+                    ($profile,
+                    $this->sysfolders[$type]['imap']
                     ,$this->IDX->get_folder_id_from_path($this->uid, $profile.':')
                     ,10
                     ,$this->sysfolders[$type]['icon']

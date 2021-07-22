@@ -90,9 +90,13 @@ class handler_email_indexer extends DB_Controller
         if (false === $uid) {
             return array();
         }
+        $Acnt = new DB_Controller_Account();
+        $ids = array_keys($Acnt->getAccountIndex($uid, false));
+        if(count($ids)<1) return array();
+        
         $return = array();
         $qh = $this->query('SELECT idx id,layered_id, childof, folder_path, friendly_name FROM '
-                .$this->Tbl['email_folder'].' WHERE uid='.intval($uid).' AND att_type="10" AND att_icon=":imapbox"');
+                .$this->Tbl['email_folder'].' WHERE acc_id IN('.implode(',', $ids).') AND att_type="10" AND att_icon=":imapbox"');
         while ($line = $this->assoc($qh)) {
             $return[] = $line;
         }
@@ -111,6 +115,10 @@ class handler_email_indexer extends DB_Controller
             return false;
         }
         $uid = intval($uid);
+        $Acnt = new DB_Controller_Account();
+        $ids = array_keys($Acnt->getAccountIndex($uid, false));
+        if(count($ids)<1) return false;
+
         $return = array();
         $syssorter = 'CASE att_icon WHEN ":inbox" THEN 0 WHEN ":outbox" THEN 1 WHEN ":drafts" THEN 2 WHEN ":templates" THEN 3'
                 .' WHEN ":sent" THEN 4 WHEN ":waste" THEN 5 WHEN ":junk" THEN 6 WHEN ":archive" THEN 7 WHEN ":mailbox" THEN 0'
@@ -119,7 +127,7 @@ class handler_email_indexer extends DB_Controller
                 ('SELECT idx id,layered_id, childof, folder_path, friendly_name, att_type `type`, att_icon `icon`,'
                 .'att_has_folders has_folders, att_has_items has_items, mailnum,mailsize,`unread`,`unseen`,`stale`,`visible`,`secure`'
                 .',IF (att_type in(0,10,20), CONCAT('.$syssorter.', "_", IF(att_type IN(0,10,20), 1000+layered_id, friendly_name)), friendly_name) namesorter'
-                .' FROM '.$this->Tbl['email_folder'].' WHERE uid IN(0,'.$uid.') ORDER BY childof ASC, namesorter ASC'
+                .' FROM '.$this->Tbl['email_folder'].' WHERE uid=0 OR acc_id IN('.implode(',', $ids).') ORDER BY childof ASC, namesorter ASC'
                 );
         $layered_0 = 0;
         while ($line = $this->assoc($qh)) {
@@ -174,10 +182,14 @@ class handler_email_indexer extends DB_Controller
     public function folders_get_unread($uid)
     {
         $return = array();
-        $query = 'SELECT idx,unread,unseen,mailnum,att_icon FROM '.$this->Tbl['email_folder'].' WHERE uid IN(0,'.intval($uid).') ORDER BY idx ASC';
-        $qid = $this->query($query);
-        while (list ($id, $num, $unseen, $total, $icon) = $this->fetchrow($qid)) {
-            $return[$id] = array('unread' => $num, 'unseen' => ($unseen), 'total' => $total, 'icon' => $icon);
+        $Acnt = new DB_Controller_Account();
+        $ids = array_keys($Acnt->getAccountIndex($uid, false));
+        if(count($ids)>0) {
+            $query = 'SELECT idx,unread,unseen,mailnum,att_icon FROM '.$this->Tbl['email_folder'].' WHERE uid=0 OR acc_id IN('.implode(',', $ids).') ORDER BY idx ASC';
+            $qid = $this->query($query);
+            while (list ($id, $num, $unseen, $total, $icon) = $this->fetchrow($qid)) {
+                $return[$id] = array('unread' => $num, 'unseen' => ($unseen), 'total' => $total, 'icon' => $icon);
+            }
         }
         // Include shared folders from other users
         if (!$this->features['shares']) {
@@ -205,13 +217,17 @@ class handler_email_indexer extends DB_Controller
      */
     public function folders_set_seen($uid)
     {
-        $this->query('UPDATE '.$this->Tbl['email_folder'].' SET unseen="0" WHERE uid IN(0,'.intval($uid).')');
+        $Acnt = new DB_Controller_Account();
+        $ids = array_keys($Acnt->getAccountIndex($uid, false));
+        if(count($ids)>0) $this->query('UPDATE '.$this->Tbl['email_folder'].' SET unseen="0" WHERE uid=0 OR acc_id IN('.implode(',', $ids).')');
     }
 
     public function folder_mark_secure($uid, $profile, $secure)
     {
-        $this->query('UPDATE '.$this->Tbl['email_folder'].' SET secure="'.($secure == 1 ? 1 : 0).'"'
-                .' WHERE uid IN(0,'.intval($uid).') AND folder_path="'.intval($profile).':"');
+        $Acnt = new DB_Controller_Account();
+        $ids = array_keys($Acnt->getAccountIndex($uid, false));
+        if(count($ids)>0) $this->query('UPDATE '.$this->Tbl['email_folder'].' SET secure="'.($secure == 1 ? 1 : 0).'"'
+                .' WHERE (uid=0 OR acc_id IN('.implode(',', $ids).')) AND folder_path="'.intval($profile).':"');
     }
 
     public function get_folder_info($uid = 0, $folder = 0)
