@@ -565,12 +565,12 @@ class Protocol_Client_SMTP extends Protocol_Client_Base
      */
     private function get_supported_sasl_mechanisms($response)
     {
+        $this->diag('get_supported_sasl_mechanisms: '.print_r($response, true));
         if (preg_match('!^250(\ |\-)AUTH(\ |\=)([\w\ \-_]+)$!Umi', $response, $found)) {
-            $found[3] = strtolower(str_replace('-',  '_',  trim($found[3])));
+            $this->diag('get_supported_sasl_mechanisms: '.print_r($found, true));
+                            $found[3] = strtolower(str_replace('-',  '_',  trim($found[3])));
             return explode(' ', $found[3]);
         }
-        $this->diag('get_supported_sasl_mechanisms: '.print_r($found, true));
-        $this->diag('get_supported_sasl_mechanisms: '.print_r($response, true));
         return array();
     }
 
