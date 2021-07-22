@@ -118,10 +118,15 @@ if (isset($_REQUEST['user']) && isset($_REQUEST['pass'])) {
                         $uid = false;
                         break;
                     }
-                    unset($API);
+                    unset($API);  
                 }
                 // Tell backend API about it
                 if ($uid) {
+                    // Groups may only be set, if the driver supports it - and they were defined by the admin
+                    if (isset($DB->features['groups']) && $DB->features['groups'] && isset($_PM_['core']['reg_defaultgroups'])) {
+                        $DB->set_usergrouplist($uid, explode(',', $_PM_['core']['reg_defaultgroups']));
+                    }
+
                     $acctype = ($use_extauth == 'imap' || $use_extauth == 'pop3') ? $use_extauth : false;
                     require_once($_PM_['path']['admin'].'/lib/configapi.class.php');
                     $cAPI = new configapi($_PM_, $DB);
