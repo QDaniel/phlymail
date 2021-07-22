@@ -2517,7 +2517,7 @@ class handler_email_driver {
             return false;
         }
         $Acnt = new DB_Controller_Account();
-        $account = $Acnt->getAccount(0, null, $profile[0]);
+        $account = $Acnt->getAccount(0, $profile[0]);
         // The profile no longer exists, so we cannot connect to it at all - remove it from the index!
         if (!isset($account['popserver']) && !isset($account['popport'])) {
             foreach ($this->get_imapkids($profile[0]) as $k => $v) {
