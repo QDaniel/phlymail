@@ -1973,7 +1973,6 @@ class handler_email_driver {
             return false;
         }
         $folders = $mbox->listMailbox('', '*', $mbox->onlysubscribed);
-        print_r($folders);
         if (!is_array($folders)) {
             $this->IDX->update_folder(array('id' => $stored['id'], 'uid' => $this->uid, 'stale' => '1'));
             return false;
