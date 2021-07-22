@@ -20,8 +20,7 @@ class cron_email_syncfoldertree
 
     public function Run()
     {
-        print_r($this->job);
-        $Acnt = new DB_Controller_Account();
+       $Acnt = new DB_Controller_Account();
         $accdata = $Acnt->getAccount(null, $this->job['item']);
         if (empty($accdata)) {
             $Cron = new DB_Controller_Cron();

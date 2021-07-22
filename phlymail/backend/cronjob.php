@@ -112,6 +112,7 @@ foreach ($jobList as $job) {
 
         vecho($jobIdentifier.' started');
         $Cron->markJobRunning($job['handler'], $job['job'], $job['item'], $me); // Mark running
+        print_r($job);
         $instance = new $className($job);
         $instance->Run();
         unset($instance);
