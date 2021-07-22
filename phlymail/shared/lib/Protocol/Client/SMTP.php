@@ -45,6 +45,7 @@ class Protocol_Client_SMTP extends Protocol_Client_Base
      */
     public function __construct($server = '', $port = 587, $user = false, $pass = false, $conn_sec = null, $self_signed = false)
     {
+        $this->_diag_session = file_exists(__DIR__.'/.debug');
         if ($this->_diag_session) {
             $this->diag = fopen(__DIR__.'/smtp_diag.txt', 'w');
             fwrite($this->diag, 'Got these params: '.$this->CRLF
