@@ -248,7 +248,7 @@ class Protocol_Client_SMTP extends Protocol_Client_Base
             } elseif (substr($response, 0, 3) == '552') {
                 $this->set_error($response);
             } else {
-                $this->set_error('FROM address '.$from.' rejected by server: ');
+                $this->set_error('FROM address '.$from.' rejected by server: '.$response);
             }
             return false;
         }
