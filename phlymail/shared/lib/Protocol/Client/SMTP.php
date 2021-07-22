@@ -563,7 +563,7 @@ class Protocol_Client_SMTP extends Protocol_Client_Base
      */
     private function get_supported_sasl_mechanisms($response)
     {
-        if (preg_match('!^250(\ |\-)AUTH(\ |\=)([\w\s-_]+)$!Umi', $response, $found)) {
+        if (preg_match('!250(\ |\-)AUTH(\ |\=)([\w\s-_]+)!Umi', $response, $found)) {
             $found[3] = strtolower(str_replace('-',  '_',  trim($found[3])));
             return explode(' ', $found[3]);
         }
@@ -579,7 +579,7 @@ class Protocol_Client_SMTP extends Protocol_Client_Base
      */
     private function get_server_maxsize($response)
     {
-        if (preg_match('!^250(\ |\-)SIZE(\ |\=)([0-9]+)$!Umi', $response, $found)) {
+        if (preg_match('!250(\ |\-)SIZE(\ |\=)([0-9]+)!Umi', $response, $found)) {
             return $found[3];
         }
         return 0;
