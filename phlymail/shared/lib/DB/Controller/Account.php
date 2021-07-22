@@ -124,14 +124,13 @@ class DB_Controller_Account extends DB_Controller
      */
     public function setLoginTime($uid = false, $accid = false, $pid = false)
     {
-        return;
         if (!$uid) {
             return;
         }
         if (!$accid && !$pid) {
             return;
         }
-        $q_r = ($accid) ? ' AND `id`='.intval($accid) : ' AND `id`='.intval($pid);
+        $q_r = ($accid) ? ' OR `id`='.intval($accid) : ' OR `id`='.intval($pid);
         return $this->query('UPDATE '.$this->Tbl['profiles'].' set logintime=NOW() WHERE uid='.intval($uid).$q_r);
     }
 
