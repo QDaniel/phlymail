@@ -15,15 +15,15 @@ $Acnt = new DB_Controller_Account();
 $activecnt = 0;
 $signs = array();
 foreach ($Acnt->get_signature_list($_SESSION['phM_uid']) as $k => $v) {
-    if (!$v['signature']) continue;
+    if (empty($v['signature']) && empty($v['signature_html']))  continue;
     phm_stripslashes($v);
-    $signs[$k] = array('sign' => $v['signature'], 'prof' => $v['title']);
+    $signs[$k] = array('sign' => $v['signature'], 'sign_html' => $v['signature_html'], 'prof' => $v['title']);
     ++$activecnt;
 }
 if ($activecnt) {
     $t_s = $tpl->get_block('sigs');
     foreach ($signs as $k => $v) {
-        $t_s->assign(array('profile' => $v['prof'], 'profid' => $k, 'sig' => $v['sign'], 'htmlsig' => text2html($v['sign'])));
+        $t_s->assign(array('profile' => $v['prof'], 'profid' => $k, 'sig' => $v['sign'], 'htmlsig' => $v['sign_html']));
         $tpl->assign('sigs', $t_s);
         $t_s->clear();
     }
