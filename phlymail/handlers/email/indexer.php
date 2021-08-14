@@ -284,7 +284,7 @@ class handler_email_indexer extends DB_Controller
     public function get_folder_id_from_path($uid = 0, $path = '', $roles = false, $allOfThem = false)
     {
         $query = (!$roles)
-                ? 'SELECT idx FROM '.$this->Tbl['email_folder'].' WHERE uid='.intval($uid).' AND folder_path="'.$this->esc($path).'"'
+                ? 'SELECT idx FROM '.$this->Tbl['email_folder'].' WHERE folder_path="'.$this->esc($path).'"'
                 : 'SELECT idx FROM '.$this->Tbl['email_folder'].' WHERE uid='.intval($uid).' AND att_icon="'.$this->esc(':'.$path).'"';
         if (false !== $allOfThem) {
             $return = array();
@@ -326,7 +326,7 @@ class handler_email_indexer extends DB_Controller
             }
             return $return;
         } elseif (0 != $profile) {
-            $res = $this->query('SELECT idx, folder_path FROM '.$this->Tbl['email_folder'].' where uid IN(0,'.intval($uid).')'
+            $res = $this->query('SELECT idx, folder_path FROM '.$this->Tbl['email_folder'].' where acc_id='.intval($profile)
                     .' AND att_icon="'.$this->esc(':'.$type).'"'
                     .' AND folder_path LIKE "'.intval($profile).':%"');
             list($idx, $path) = $this->fetchrow($res);
@@ -440,8 +440,10 @@ class handler_email_indexer extends DB_Controller
         unset($out);
         // If nothing found to update, return as false
         if (!$query) return false;
+        if (!$this->check_perm_folder($pass['uid'], $pass['id'])) return false;
+ 
         return $this->query('UPDATE '.$this->Tbl['email_folder'].' SET `uuid`="'.basics::uuid().'",'.$query
-                .' WHERE idx='.intval($pass['id']).' AND uid IN(0,'.intval($pass['uid']).')');
+                .' WHERE idx='.intval($pass['id']));
     }
 
     /**
@@ -455,7 +457,8 @@ class handler_email_indexer extends DB_Controller
      */
     public function hide_folder($uid, $id, $visible)
     {
-        return $this->query('UPDATE '.$this->Tbl['email_folder'].' SET visible="'.($visible ? 1 : 0).'" WHERE idx='.intval($id).' AND uid='.intval($uid));
+        if (!$this->check_perm_folder($uid, $id)) return false;
+        return $this->query('UPDATE '.$this->Tbl['email_folder'].' SET visible="'.($visible ? 1 : 0).'" WHERE idx='.intval($id));
     }
 
     /**
@@ -471,16 +474,17 @@ class handler_email_indexer extends DB_Controller
      */
     public function remove_folder($uid, $id, $with_childs = false, $with_mails = true)
     {
+        if (!$this->check_perm_folder($uid, $id)) return false;
         $affected = false;
         if ($with_childs) {
-            $qid = $this->query('SELECT idx FROM '.$this->Tbl['email_folder'].' WHERE childof='.intval($id).' AND uid='.intval($uid));
+            $qid = $this->query('SELECT idx FROM '.$this->Tbl['email_folder'].' WHERE childof='.intval($id));
             while (list($child) = $this->fetchrow($qid)) {
                 $affected = $this->remove_folder($uid, $child, true);
                 if (!$affected) return false;
             }
         }
         if ($with_mails) $this->mail_delete($uid, false, $id);
-        return ($this->query('DELETE FROM '.$this->Tbl['email_folder'].' WHERE idx='.intval($id).' AND uid='.intval($uid))
+        return ($this->query('DELETE FROM '.$this->Tbl['email_folder'].' WHERE idx='.intval($id))
                 && $this->query('DELETE FROM '.$this->Tbl['user_foldersettings'].' WHERE `handler`="email" AND `fid`='.intval($id)));
     }
 
