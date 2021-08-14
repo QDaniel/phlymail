@@ -465,7 +465,7 @@ $tpl->assign(array
         ,'mark_junk' => (isset($_PM_['antijunk']['use_feature']) && $_PM_['antijunk']['use_feature']
                 && isset($_PM_['antijunk']['cmd_learnspam']) && $_PM_['antijunk']['cmd_learnspam']
                 && isset($_PM_['antijunk']['cmd_learn_ham']) && $_PM_['antijunk']['cmd_learn_ham']) ? 1 : 0
-        ,'folder_writable' => (int) ($folder['uid'] == $_SESSION['phM_uid'])
+        ,'folder_writable' => 1 // (int) ($folder['uid'] == $_SESSION['phM_uid'])
         ,'use_preview' => (isset($use_preview) && $use_preview) ? 1 : 0
         ,'allow_resize' => (!isset($_PM_['core']['resize_mainwindows']) || $_PM_['core']['resize_mainwindows']) ? 1 : 0
         ,'customheight' => (isset($_PM_['customsize']['email_previewheight']) && $_PM_['customsize']['email_previewheight'])
