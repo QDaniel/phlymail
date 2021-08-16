@@ -372,9 +372,11 @@ class handler_email_indexer extends DB_Controller
         if (!isset($pass['uidvalidity'])) $pass['uidvalidity'] = 0;
 
         // A bit lousy, should better be done by subquerying...
-        $qid = $this->query('SELECT max(layered_id) FROM '.$this->Tbl['email_folder'].' WHERE childof='.intval($pass['childof']));
-        list ($max_layered) = $this->fetchrow($qid);
-        $query = 'INSERT INTO '.$this->Tbl['email_folder'].' SET uid='.intval($pass['uid'])
+        $qid = $this->query('SELECT max(layered_id) , uid FROM '.$this->Tbl['email_folder'].' WHERE childof='.intval($pass['childof']));
+        list ($max_layered, $uid) = $this->fetchrow($qid);
+        if(empty($uid)) $uid = $pass['uid'];
+        
+        $query = 'INSERT INTO '.$this->Tbl['email_folder'].' SET uid='.intval($uid)
                 .',acc_id='.intval($pass['acc_id'])
                 .',`uuid`="'.basics::uuid().'"'
                 .',friendly_name="'.$this->esc($pass['friendly_name']).'"'
