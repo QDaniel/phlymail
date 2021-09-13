@@ -194,12 +194,12 @@ function put_attach_stream(&$stream, $filename = '', $type = 'application/octet-
         switch ($encoding) {
         case 'q':
             $stream->put_data_to_stream('Content-Transfer-Encoding: quoted-printable'.$LE.$LE);
-            while ($line = fgets($fh_src)) $stream->put_data_to_stream(phm_quoted_printable_encode($line));
+            while ($line = fgets($fh_src, 990)) $stream->put_data_to_stream(phm_quoted_printable_encode($line));
             break;
         case '8':
         case '7':
             $stream->put_data_to_stream('Content-Transfer-Encoding: '.$encoding.'bit'.$LE.$LE);
-            while ($line = fgets($fh_src)) $stream->put_data_to_stream($line);
+            while ($line = fgets($fh_src, 990)) $stream->put_data_to_stream($line);
             break;
         default:
             $stream->put_data_to_stream('Content-Transfer-Encoding: base64'.$LE.$LE);

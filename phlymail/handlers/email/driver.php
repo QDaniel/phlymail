@@ -1419,7 +1419,7 @@ class handler_email_driver {
             $mbox = $this->connect_imap($targ['folder_path'], false, false);
             $mbox->appendMessage($mbox->mboxstring, $bytes, $imap_flags);
             while ($bytes > 0) {
-                $line = fgets($srcFp);
+                $line = fgets($srcFp, 990);
                 $bytes -= strlen($line);
                 $mbox->append_ml($line);
             }
@@ -1798,7 +1798,7 @@ class handler_email_driver {
             $mbox = $this->connect_imap($info['folder_path'], false, false);
             $tgtFp = $mbox->appendMessage($mbox->mboxstring, $bytes, (isset($data['status']) && $data['status']) ? array('\Seen') : null);
             while ($bytes > 0) {
-                $line = fgets($res);
+                $line = fgets($res, 990);
                 $bytes -= strlen($line);
                 $mbox->append_ml($line);
             }
