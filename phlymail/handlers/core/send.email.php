@@ -505,7 +505,7 @@ if (isset($_REQUEST['WP_do']) && 'send' == $_REQUEST['WP_do']) {
             }
         }
         // This will catch up with the body (or start at the beginning in case of Sendmail)
-        while (!feof($tmpout) && false !== ($line = fgets($tmpout, 90))) {
+        while (!feof($tmpout) && false !== ($line = fgets($tmpout, 990))) {
             $sm->put_data_to_stream($line);
         }
         // Make sure, there's a finalising CRLF.CRLF
